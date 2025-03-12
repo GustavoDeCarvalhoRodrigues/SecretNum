@@ -1,0 +1,7 @@
+body {
+        background-image: image-set("../Img/Image.png");
+}
+body .coisa {
+    border: solid;
+    min-width: 250px;
+}
