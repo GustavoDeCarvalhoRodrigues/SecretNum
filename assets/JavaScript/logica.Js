@@ -1,122 +1,79 @@
 let listNumber = [];
-            let limiteNumber = 10;
-            let secretNumber = gerarNumeroAleatorio();
-            let tentativas = 2;
+let maxNumber = 20;
+let limiteNumber = maxNumber;
+let numberMin = 0;
+let secretNumber = gerarNumeroAleatorio();
+let tentativas = 1;
+let maxTentativas = 3;
 
-            function gerarNumeroAleatorio() {
-                let numeroEscolhido = parseInt(Math.random() * limiteNumber + 1)
-                let qtdElementList = listNumber.length
 
-                if (qtdElementList == limiteNumber) {
-                    listNumber = [];
-                }
+function gerarNumeroAleatorio() {
+    let numeroEscolhido = parseInt(Math.random() * limiteNumber + 1)
+    let qtdElementList = listNumber.length
 
-                if (listNumber.includes(numeroEscolhido)) {
-                    return gerarNumeroAleatorio();
-                } else {
-                    listNumber.push(numeroEscolhido)
-                    console.log(listNumber)
-                    return numeroEscolhido;
-                }
-            }
+    if (qtdElementList == limiteNumber) {
+        listNumber = [];
+    }
 
-            /**
-             * Função que limpa o campo de entrada do usuário.
-             * Após cada tentativa, o campo de entrada deve ser resetado para evitar que o usuário tenha que apagá-lo manualmente.
-            */
-            function limparCampo() {
-                // Obtém o campo de entrada do usuário
-                let chute = document.querySelector('input');
+    if (listNumber.includes(numeroEscolhido)) {
+        return gerarNumeroAleatorio();
+    } else {
+        listNumber.push(numeroEscolhido)
+        console.log(listNumber)
+        return numeroEscolhido;
+    }
+}
 
-                // Limpa o valor do campo, deixando-o pronto para a próxima tentativa
-                chute.value = '';
-            }
+function limparCampo() {
+    let chute = document.getElementById("chute").value;
+    chute = "";
+}
 
-            /**
-             * Função que reinicia o jogo para uma nova rodada.
-             * Gera um novo número secreto, reseta as tentativas e reativa a interface para um novo jogo.
-            */
-            function reiniciarJogo() {
-                // Gera um novo número secreto para a nova rodada
-                secretNumber = gerarNumeroAleatorio();
+function reiniciarJogo() {
+    document.getElementById('reiniciar').setAttribute('disabled', true);
+    document.getElementById('chute').removeAttribute('disabled');
+    secretNumber = gerarNumeroAleatorio();
+    tentativas = 1;
+     limparCampo();
+    exibirTextoNaTela('h1', 'Adivinhe o <span class="container__texto-azul">número secreto</span>');
+    exibirTextoNaTela('p', 'Escolha um número entre' + numberMin + ' a ' + maxNumber);
+}
 
-                // Limpa o campo de entrada para um novo chute
-                limparCampo();
+function exibirTextoNaTela(tag, texto) {
+    let campo = document.querySelector(tag);
+    campo.innerHTML = texto;
+    responsiveVoice.speak(texto, 'Brazilian Portuguese Female', { rate: 1.2 });
+}
 
-                // Reseta o número de tentativas
-                tentativas = 1;
+function verificarChute() {
+    let chute = document.querySelector('input').value;
+    console.log(secretNumber);
+    if (chute == secretNumber) {
+        document.getElementById('reiniciar').removeAttribute('disabled');
+        document.getElementById('chute').setAttribute('disabled', true);
+        exibirTextoNaTela('h1', 'Acertou!');
+        exibirTextoNaTela('p', 'Meus parabéns, clique em novo jogo e volte a brincar!');
 
-                // Atualiza os textos na tela para iniciar um novo jogo
-                exibirTextoNaTela('h1', 'Adivinhe o <span class="container__texto-azul">número secreto</span>');
-                exibirTextoNaTela('p', 'Escolha um número entre 1 a 10');
+    } else if (chute > maxNumber || chute < numberMin) {
+        exibirTextoNaTela('p', 'Por favor, insira um numero entre ' + numberMin + ' a ' + limiteNumber);
+    }
 
-                // Desativa o botão de reiniciar até que o jogo termine novamente
-                document.getElementById('reiniciar').setAttribute('disabled', true);
-            }
+    else if (tentativas == maxTentativas) {
+        document.getElementById('reiniciar').removeAttribute('disabled');
+        document.getElementById('chute').setAttribute('disabled', true);
+        exibirTextoNaTela('h1', 'Errou! Número máximo de tentativas é ' + maxTentativas);
+        exibirTextoNaTela('p', 'O número secreto era: ' + secretNumber);
+        
+    }
+    else { 
+        tentativas++;
 
-            /**
-             * Função que exibe um texto na tela dentro do elemento especificado.
-             * Além de alterar o conteúdo HTML, a função utiliza a API `responsiveVoice` para leitura do texto em voz alta.
-             *
-             * @param {string} tag - A tag HTML do elemento onde o texto será inserido (ex: 'h1', 'p').
-             * @param {string} texto - O texto a ser exibido na tela e falado pela voz sintetizada.
-            */
-            function exibirTextoNaTela(tag, texto) {
-                // Seleciona o elemento HTML com base na tag fornecida
-                let campo = document.querySelector(tag);
+        if (chute > secretNumber) {
+            exibirTextoNaTela('p', 'O número secreto é menor');
+        } else {
+            exibirTextoNaTela('p', 'O número secreto é maior');
+        }
 
-                // Define o novo conteúdo do elemento
-                campo.innerHTML = texto;
-
-                // Utiliza a API responsiveVoice para leitura em voz alta do texto
-                responsiveVoice.speak(texto, 'Brazilian Portuguese Female', { rate: 1.2 });
-            }
-
-            /**
-             * Função que verifica se o número digitado pelo jogador é igual ao número secreto.
-             * Se o jogador acertar, exibe mensagem de vitória e habilita o botão para reiniciar o jogo.
-             * Se errar, informa se o número secreto é maior ou menor e contabiliza as tentativas.
-             * O jogador tem no máximo 2 tentativas.
-            */
-            function verificarChute() {
-                // Obtém o valor digitado pelo jogador no input
-                let chute = document.querySelector('input').value;
-                console.log(secretNumber); // Exibe o número secreto no console para debug
-
-                // Verifica se o jogador acertou o número secreto
-                if (chute == secretNumber) {
-                    exibirTextoNaTela('h1', 'Acertou!');
-                    exibirTextoNaTela('p', 'Meus parabéns, clique em novo jogo e volte a brincar!');
-
-                    // Habilita o botão para reiniciar o jogo
-                    document.getElementById('reiniciar').removeAttribute('disabled');
-
-                    // Desabilita o campo de entrada para impedir novas jogadas
-                    document.getElementById('chute').setAttribute('disabled', true);
-                }
-                // Verifica se o jogador atingiu o número máximo de tentativas
-                else if (tentativas == 2) {
-                    exibirTextoNaTela('h1', 'Errou! Número máximo de tentativas é 2');
-                    exibirTextoNaTela('p', 'O número secreto era: ' + secretNumber);
-
-                    // Habilita o botão para reiniciar o jogo
-                    document.getElementById('reiniciar').removeAttribute('disabled');
-
-                    // Desabilita o campo de entrada para impedir novas
-                    document.getElementById('chute').setAttribute('disabled', true);
-                }
-                // Caso o jogador erre, informa se o número secreto é maior ou
-                else {
-                    if (chute > secretNumber) {
-                        exibirTextoNaTela('p', 'O número secreto é menor');
-                    } else {
-                        exibirTextoNaTela('p', 'O número secreto é maior');
-                    }
-
-                    // Incrementa a contagem de
-                    tentativas++;
-
-                    // Limpa o campo de entrada para o próximo
-                    limparCampo();
-                }
-            }
+        limparCampo();
+    }
+}
